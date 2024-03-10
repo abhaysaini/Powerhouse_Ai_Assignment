@@ -6,7 +6,6 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
@@ -15,15 +14,15 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.powerhouse_ai_assignment.R
-import com.example.powerhouse_ai_assignment.data.database.AppDatabase
 import com.example.powerhouse_ai_assignment.data.database.dao.WeatherDao
 import com.example.powerhouse_ai_assignment.data.database.entity.WeatherData
+import com.example.powerhouse_ai_assignment.data.model.City
 import com.example.powerhouse_ai_assignment.data.model.Weather
 import com.example.powerhouse_ai_assignment.data.model.WeatherResponse
 import com.example.powerhouse_ai_assignment.databinding.ActivityMainBinding
+import com.example.powerhouse_ai_assignment.ui.adapter.CitiesAdapter
 import com.example.powerhouse_ai_assignment.ui.main.viewModel.MainViewModel
 import com.example.powerhouse_ai_assignment.utils.NetworkUtils
 import com.example.powerhouse_ai_assignment.utils.TimeUtil
@@ -33,12 +32,9 @@ import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
-import java.util.Locale
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -46,6 +42,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+
     @Inject
     lateinit var weatherDao: WeatherDao
 
@@ -64,6 +61,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        setUpRecyclerView()
         if (hasLocationPermission() && NetworkUtils.isNetworkAvailable(this)) {
             fetchLocation()
         } else if (!(NetworkUtils.isNetworkAvailable(this)) && hasLocationPermission()) {
@@ -72,6 +70,21 @@ class MainActivity : AppCompatActivity() {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
         observeWeatherData()
+    }
+
+    private fun setUpRecyclerView() {
+        val cities = listOf(
+            City("New York"),
+            City("Singapore"),
+            City("Mumbai"),
+            City("Delhi"),
+            City("Sydney"),
+            City("Melbourne")
+        )
+        binding.apply {
+            recyclerView.layoutManager = LinearLayoutManager(this@MainActivity,LinearLayoutManager.HORIZONTAL, false)
+            recyclerView.adapter = CitiesAdapter(supportFragmentManager,cities)
+        }
     }
 
     private fun observeWeatherData() {
@@ -86,11 +99,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun savedLocalData() {
-        CoroutineScope(Dispatchers.Main).launch {
-            val savedWeatherResponse = viewModel.getSavedWeatherResponse()
-            if (savedWeatherResponse != null) {
-                updateUI(savedWeatherResponse)
+        try {
+            CoroutineScope(Dispatchers.Main).launch {
+                val savedWeatherResponse = viewModel.getSavedWeatherResponse()
+                if (savedWeatherResponse != null) {
+                    updateUI(savedWeatherResponse)
+                }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -134,7 +151,7 @@ class MainActivity : AppCompatActivity() {
             weatherUnit.text = getString(R.string.celsius)
             weatherType.text = weatherResponse.weather[0].description
             atmosphericPressureValue.text = weatherResponse.main.pressure.toString()
-            windValue.text = (weatherResponse.wind.speed * 100).toString()
+            windValue.text = String.format("%.2f", weatherResponse.wind.speed * 100)
             humidityValue.text = weatherResponse.main.humidity.toString()
             tomorrowSunrise.text =
                 TimeUtil.convertUnixTimestampToTime(weatherResponse.sys.sunrise.toLong())

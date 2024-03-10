@@ -19,10 +19,22 @@ class MainViewModel @Inject constructor(private val repository: MainRepository) 
     val weatherResponse: LiveData<WeatherResponse>
         get() = _weatherResponse
 
+    private val _weatherResponseForCity = MutableLiveData<WeatherResponse>()
+    val weatherResponseForCity: LiveData<WeatherResponse>
+        get() = _weatherResponseForCity
+
     suspend fun getWeather(latitude: Double, longitude: Double) {
         viewModelScope.launch(Dispatchers.IO) {
             val response = repository.getResponse(latitude, longitude)
             _weatherResponse.postValue(response)
+            Log.i("abhay", response.toString())
+        }
+    }
+
+    suspend fun getWeatherForCity(cityName:String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = repository.getResponseForCity(cityName)
+            _weatherResponseForCity.postValue(response)
             Log.i("abhay", response.toString())
         }
     }

@@ -18,6 +18,12 @@ class MainRepository @Inject constructor(private val apiInterface: RetrofitApiIn
             apiInterface.getWeather(latitude,longitude,API_KEY)
         }
     }
+    suspend fun getResponseForCity(cityName:String): WeatherResponse {
+        return withContext(Dispatchers.IO) {
+            apiInterface.getWeatherByCity(cityName,API_KEY)
+        }
+    }
+
 
     suspend fun getSavedWeatherResponse(): WeatherResponse? {
         return withContext(Dispatchers.IO) {
