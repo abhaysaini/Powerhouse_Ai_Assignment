@@ -2,4 +2,10 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="textColor">#313341</color>
+    <color name="upcomingTimeColor">#9C9EAA</color>
+    <color name="defaultColor">#808080</color>
+    <color name="blue_liner">#92A3FD</color>
+    <color name="blue">#98BFFD</color>
+    <color name="purple_shadow">#C58BF2</color>
 </resources>

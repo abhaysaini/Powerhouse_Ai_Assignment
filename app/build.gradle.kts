@@ -63,6 +63,10 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
     implementation("androidx.activity:activity-ktx:1.8.2")
 
+    //Location Service
+    implementation("com.google.android.gms:play-services-location:21.2.0")
+
+
     // okHTTP logging
     implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2")
 
@@ -73,4 +77,10 @@ dependencies {
     //Hilt Dagger
     implementation("com.google.dagger:hilt-android:2.48.1")
     kapt("com.google.dagger:hilt-android-compiler:2.48.1")
+
+    // Room ktx
+    implementation("androidx.room:room-runtime:2.6.1")
+    annotationProcessor("androidx.room:room-compiler:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
 }
